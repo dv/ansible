@@ -236,6 +236,18 @@ class Role(Base, Become, Conditional, Taggable):
                                          obj=handler_data, orig_exc=e)
 
     def _load_role_yaml(self, subdir, main=None, allow_dir=False):
+        return self._load_role_yaml_from_file(subdir) or self._load_role_yaml_from_directory(subdir, main, allow_dir)
+
+    def _load_role_yaml_from_file(self, subdir):
+        file_path = os.path.join(self._role_path, subdir)
+        valid_exts = [ "", ".yml", ".yaml", ".json" ]
+        main_files = [ "%s%s" % (file_path, ext) for ext in valid_exts ]
+        for main_file in main_files:
+            if self._loader.path_exists(main_file) and not self._loader.is_directory(main_file):
+             return self._loader.load_from_file(main_file)
+        return None
+
+    def _load_role_yaml_from_directory(self, subdir, main=None, allow_dir=False):
         file_path = os.path.join(self._role_path, subdir)
         if self._loader.path_exists(file_path) and self._loader.is_directory(file_path):
             # Valid extensions and ordering for roles is hard-coded to maintain
